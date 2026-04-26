@@ -1,0 +1,249 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --bg-base: #000000;
+  --bg-card: rgba(20, 20, 20, 0.5);
+  --bg-panel: rgba(255, 255, 255, 0.03);
+  --ink-main: #ffffff;
+  --ink-muted: #b3b3b3;
+  --line: rgba(255, 255, 255, 0.2);
+  --accent: #ffffff;
+  --accent-soft: #ffffff;
+  --danger: #ff9b9b;
+  --shadow: 0 30px 100px rgba(0, 0, 0, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink-main);
+  font-family: var(--font-body), sans-serif;
+  background:
+    radial-gradient(circle at 10% 5%, #161616 0%, transparent 35%),
+    radial-gradient(circle at 85% 10%, #141414 0%, transparent 40%),
+    linear-gradient(130deg, #000000 0%, #0b0b0b 55%, #000000 100%);
+  background-attachment: fixed;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.pageShell {
+  position: relative;
+  padding: 2.5rem 1.6rem;
+  min-height: 100vh;
+}
+
+.textureLayer {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06) 0,
+    rgba(255, 255, 255, 0.06) 1px,
+    transparent 1px,
+    transparent 5px
+  );
+}
+
+.translatorCard {
+  position: relative;
+  z-index: 1;
+  margin: 0 auto;
+  max-width: 860px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04) 45%, rgba(255, 255, 255, 0.02)),
+    rgba(12, 12, 12, 0.24);
+  backdrop-filter: blur(26px) saturate(120%);
+  -webkit-backdrop-filter: blur(26px) saturate(120%);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  padding: 1.55rem;
+}
+
+.cardHeader {
+  margin-bottom: 1.2rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.cardHeader h1 {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-heading), serif;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 0.95;
+  font-weight: 700;
+  letter-spacing: 0.015em;
+}
+
+.contextLine {
+  margin: 0.7rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ink-muted);
+}
+
+.contextPill {
+  font-size: 0.77rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.24rem 0.62rem;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.fieldLabel {
+  color: var(--ink-main);
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.8rem;
+  font-size: 0.9rem;
+}
+
+.sectionLabel {
+  display: inline-block;
+  margin-top: 0;
+  margin-bottom: 0.9rem;
+  line-height: 1.1;
+}
+
+.inputArea,
+.selectInput {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-panel);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--ink-main);
+  padding: 0.78rem 0.82rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.inputArea {
+  resize: vertical;
+  min-height: 140px;
+  line-height: 1.45;
+}
+
+.inputArea:focus,
+.selectInput:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.liveStatus {
+  margin: 0.5rem 0 0;
+  color: var(--ink-muted);
+  font-size: 0.84rem;
+}
+
+.languageGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.actionRow {
+  margin-top: 1.1rem;
+  display: flex;
+  gap: 0.55rem;
+}
+
+.actionButton {
+  border-radius: 12px;
+  border: 1px solid transparent;
+  padding: 0.63rem 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 150ms ease, opacity 150ms ease, background 150ms ease;
+}
+
+.actionButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.actionButton:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.actionPrimary {
+  color: #000000;
+  background: linear-gradient(130deg, #cfcfcf, #ffffff);
+}
+
+.actionGhost {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--line);
+  color: var(--ink-main);
+}
+
+.errorText {
+  margin-top: 0.6rem;
+  color: var(--danger);
+  font-size: 0.92rem;
+}
+
+.resultSection {
+  margin-top: 1.2rem;
+}
+
+.inputReadOnly {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.copyRow {
+  margin-top: 0.55rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.charCount {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 700px) {
+  .pageShell {
+    padding: 1.1rem 0.82rem;
+  }
+
+  .translatorCard {
+    border-radius: 20px;
+    padding: 1rem;
+  }
+
+  .languageGrid {
+    grid-template-columns: 1fr;
+  }
+}
