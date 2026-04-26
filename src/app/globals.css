@@ -117,6 +117,12 @@ textarea {
   background: rgba(255, 255, 255, 0.06);
 }
 
+.configHint {
+  margin: 0.6rem 0 0;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+}
+
 .fieldLabel {
   color: var(--ink-main);
   display: grid;

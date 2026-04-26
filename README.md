@@ -15,7 +15,12 @@ This project is a Zoom side-panel translation app built with Next.js. Users can 
    - `npm install`
 2. Create your env file:
    - `cp .env.example .env.local`
-3. Set `OPENAI_API_KEY` in `.env.local`.
+3. Set the required keys in `.env.local`:
+   - `OPENAI_API_KEY`
+   - `NEXT_PUBLIC_ZOOM_CLIENT_ID`
+   - `ZOOM_CLIENT_ID`
+   - `ZOOM_CLIENT_SECRET`
+   - `ZOOM_SECRET_TOKEN`
 4. Start local dev server:
    - `npm run dev`
 
@@ -31,6 +36,16 @@ Create a **Zoom App** in Zoom Marketplace and configure:
 - **Scopes**: include the minimum scopes needed for your app installation flow (for this MVP, only side-panel rendering is required)
 
 Install the app to your Zoom test account, then open a meeting and launch the app from Zoom Apps.
+
+### Map Marketplace values to `.env.local`
+
+- **Client ID** in Zoom Marketplace:
+  - `NEXT_PUBLIC_ZOOM_CLIENT_ID`
+  - `ZOOM_CLIENT_ID`
+- **Client Secret** in Zoom Marketplace:
+  - `ZOOM_CLIENT_SECRET`
+- **Secret Token** in Zoom Marketplace:
+  - `ZOOM_SECRET_TOKEN`
 
 ## How It Works
 

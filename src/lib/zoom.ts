@@ -1,10 +1,12 @@
 "use client";
 
 import zoomSdk from "@zoom/appssdk";
+import { getPublicZoomConfig } from "@/lib/env";
 
 type ZoomInitState = {
   isReady: boolean;
   context: string;
+  isConfigured: boolean;
 };
 
 let initPromise: Promise<ZoomInitState> | null = null;
@@ -15,6 +17,9 @@ export async function initializeZoomSdk(): Promise<ZoomInitState> {
   }
 
   initPromise = (async () => {
+    const publicZoomConfig = getPublicZoomConfig();
+    const isConfigured = Boolean(publicZoomConfig.clientId);
+
     try {
       await zoomSdk.config({
         capabilities: ["getRunningContext"],
@@ -24,12 +29,14 @@ export async function initializeZoomSdk(): Promise<ZoomInitState> {
 
       return {
         isReady: true,
-        context: contextResult?.context ?? "unknown"
+        context: contextResult?.context ?? "unknown",
+        isConfigured
       };
     } catch {
       return {
         isReady: false,
-        context: "browser"
+        context: "browser",
+        isConfigured
       };
     }
   })();

@@ -17,14 +17,17 @@ export function TranslatorPanel() {
   const [isLoading, setIsLoading] = useState(false);
   const [lastInput, setLastInput] = useState("");
   const [zoomContext, setZoomContext] = useState("initializing");
+  const [zoomConfigured, setZoomConfigured] = useState(true);
 
   useEffect(() => {
     initializeZoomSdk()
       .then((result) => {
         setZoomContext(result.context);
+        setZoomConfigured(result.isConfigured);
       })
       .catch(() => {
         setZoomContext("browser");
+        setZoomConfigured(false);
       });
   }, []);
 
@@ -80,6 +83,11 @@ export function TranslatorPanel() {
             Translate text quickly during live meetings.
             <span className="contextPill">Context: {zoomContext}</span>
           </p>
+          {!zoomConfigured ? (
+            <p className="configHint">
+              Zoom client not configured. Set `NEXT_PUBLIC_ZOOM_CLIENT_ID` in `.env.local`.
+            </p>
+          ) : null}
         </header>
 
         <div className="languageGrid">
