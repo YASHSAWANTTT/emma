@@ -239,6 +239,206 @@ textarea {
   font-size: 0.8rem;
 }
 
+.appNav {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1.25rem;
+  border-bottom: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.appNavBrand {
+  font-family: var(--font-heading), serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ink-main);
+  text-decoration: none;
+}
+
+.appNavLinks {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.appNavLink {
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+
+.appNavLink:hover {
+  color: var(--ink-main);
+}
+
+.appNavLinkActive {
+  color: var(--ink-main);
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.practiceCard {
+  margin-top: 0.5rem;
+}
+
+.practiceProgressBar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.practiceProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #888, #fff);
+  border-radius: 999px;
+  transition: width 220ms ease;
+}
+
+.practiceMeta {
+  margin: 0 0 0.75rem;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+.practiceExercise {
+  margin-top: 0.5rem;
+}
+
+.practicePrompt {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+.practiceGapSentence {
+  white-space: pre-wrap;
+}
+
+.practiceBlank {
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 4px;
+}
+
+.practiceSub {
+  margin: 0 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+
+.practiceChoices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+}
+
+.practiceChoice {
+  text-align: left;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink-main);
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.practiceChoice:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.practiceChoiceSelected {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.practiceChoiceCorrect {
+  border-color: rgba(180, 255, 180, 0.5);
+  background: rgba(80, 160, 80, 0.2);
+}
+
+.practiceChoiceWrong {
+  border-color: rgba(255, 150, 150, 0.5);
+  background: rgba(160, 60, 60, 0.2);
+}
+
+.practiceExplain {
+  margin: 0 0 0.75rem;
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  line-height: 1.4;
+}
+
+.practiceInput {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-panel);
+  color: var(--ink-main);
+  padding: 0.65rem 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.practiceBuildSentence {
+  min-height: 2.5rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 12px;
+  border: 1px dashed var(--line);
+  margin-bottom: 0.65rem;
+  font-size: 1rem;
+}
+
+.practiceChipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.65rem;
+}
+
+.practiceChip {
+  padding: 0.4rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink-main);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.practiceChip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.practiceSummary {
+  text-align: center;
+  padding: 0.5rem 0 1rem;
+}
+
+.practiceSummaryTitle {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-heading), serif;
+  font-size: 1.75rem;
+}
+
+.practiceSummaryScore {
+  margin: 0 0 0.35rem;
+  color: var(--ink-muted);
+}
+
 @media (max-width: 700px) {
   .pageShell {
     padding: 1.1rem 0.82rem;

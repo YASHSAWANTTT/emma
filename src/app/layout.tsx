@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Bodoni_Moda, Instrument_Sans } from "next/font/google";
+import { AppShell } from "@/components/AppShell";
 import "./globals.css";
 
 const headingFont = Bodoni_Moda({
@@ -16,7 +17,7 @@ const bodyFont = Instrument_Sans({
 
 export const metadata: Metadata = {
   title: "Emma",
-  description: "Translate short text in a Zoom side panel."
+  description: "Translate and practice languages in a Zoom side panel."
 };
 
 export default function RootLayout({
@@ -24,7 +25,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${headingFont.variable} ${bodyFont.variable}`}>{children}</body>
+      <body className={`${headingFont.variable} ${bodyFont.variable}`}>
+        <AppShell>{children}</AppShell>
+      </body>
     </html>
   );
 }

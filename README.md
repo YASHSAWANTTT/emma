@@ -1,6 +1,6 @@
-# Zoom Marketplace Translator MVP
+# Emma (Zoom translator + practice)
 
-This project is a Zoom side-panel translation app built with Next.js. Users can type or paste text and translate it into a selected language using OpenAI.
+This project is a Zoom-friendly Next.js app: **Translate** text with OpenAI, and **Practice** with short interactive drills (multiple choice, fill-in-the-blank, build-a-sentence) by language and level.
 
 ## Prerequisites
 
@@ -26,6 +26,17 @@ This project is a Zoom side-panel translation app built with Next.js. Users can 
 
 The app runs at `http://localhost:3000`.
 
+## Practice mode (`/practice`)
+
+- Open **Practice** from the top nav or go to `/practice`.
+- Pick a **language** (no “auto” — you choose what you’re learning) and a **level**:
+  - **Beginner** — roughly A1–A2: short phrases, basic vocabulary.
+  - **Intermediate** — roughly B1–B2: everyday topics, richer sentences.
+  - **Advanced** — roughly C1-ish: more nuance and longer prompts.
+- Each lesson is generated on demand via `POST /api/practice/generate` (OpenAI). Exercises include MCQ, gap fill (`___`), and word-order “build” challenges.
+
+**Teacher disclaimer:** AI-generated content can be wrong or culturally off. Review material before using it for formal assessment or graded homework.
+
 ## Zoom Marketplace Configuration
 
 Create a **Zoom App** in Zoom Marketplace and configure:
@@ -49,8 +60,10 @@ Install the app to your Zoom test account, then open a meeting and launch the ap
 
 ## How It Works
 
-- Frontend UI is rendered in `src/components/TranslatorPanel.tsx`.
-- Server translation route is `POST /api/translate` in `src/app/api/translate/route.ts`.
+- Translate UI: `src/components/TranslatorPanel.tsx` (home `/`).
+- Practice UI: `src/components/practice/PracticeSession.tsx` (`/practice`).
+- `POST /api/translate` — translation.
+- `POST /api/practice/generate` — lesson JSON (exercises array).
 - OpenAI key is only used server-side.
 
 ## Test Plan
