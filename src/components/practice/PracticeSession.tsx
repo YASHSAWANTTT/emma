@@ -1,15 +1,23 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useSyncExternalStore, useState } from "react";
 import { languageOptions } from "@/lib/languages";
-import { practiceLevels, type PracticeExercise, type PracticeLevel } from "@/lib/practiceTypes";
+import { type PracticeExercise } from "@/lib/practiceTypes";
 import { PracticeExerciseStep } from "@/components/practice/PracticeExerciseStep";
+import { PracticeRoadmap } from "@/components/practice/PracticeRoadmap";
+import {
+  getStableRoadmapProgress,
+  markLessonComplete,
+  subscribeRoadmapProgress,
+  type RoadmapNode
+} from "@/lib/practiceRoadmap";
+
+const serverRoadmapSnapshot = { unlockedIndex: 0, completedIds: [] as string[] };
 
 const STORAGE_KEY = "emma-practice-prefs";
 
 type Prefs = {
   language: string;
-  level: PracticeLevel;
   bestStreak: number;
 };
 
@@ -18,9 +26,12 @@ function loadPrefs(): Prefs | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    const p = JSON.parse(raw) as Prefs;
-    if (!p.language || !practiceLevels.includes(p.level)) return null;
-    return p;
+    const p = JSON.parse(raw) as Partial<Prefs>;
+    if (typeof p.language !== "string" || !p.language) return null;
+    return {
+      language: p.language,
+      bestStreak: typeof p.bestStreak === "number" ? p.bestStreak : 0
+    };
   } catch {
     return null;
   }
@@ -34,12 +45,6 @@ function savePrefs(p: Prefs) {
   }
 }
 
-const levelLabels: Record<PracticeLevel, string> = {
-  beginner: "Beginner",
-  intermediate: "Intermediate",
-  advanced: "Advanced"
-};
-
 export function PracticeSession() {
   const practiceLangs = useMemo(
     () => languageOptions.filter((l) => l.code !== "auto"),
@@ -47,12 +52,20 @@ export function PracticeSession() {
   );
 
   const initial = loadPrefs();
+  const initialLang = initial?.language ?? "es";
 
-  const [language, setLanguage] = useState(() => initial?.language ?? "es");
-  const [level, setLevel] = useState<PracticeLevel>(() => initial?.level ?? "beginner");
+  const [language, setLanguage] = useState(initialLang);
   const [bestStreak, setBestStreak] = useState(() => initial?.bestStreak ?? 0);
+  const roadmapProgress = useSyncExternalStore(
+    subscribeRoadmapProgress,
+    () => getStableRoadmapProgress(language),
+    () => serverRoadmapSnapshot
+  );
 
-  const [phase, setPhase] = useState<"pick" | "loading" | "run" | "summary">("pick");
+  const [phase, setPhase] = useState<"roadmap" | "loading" | "run" | "summary">("roadmap");
+  const [activeLesson, setActiveLesson] = useState<{ node: RoadmapNode; index: number } | null>(
+    null
+  );
   const [exercises, setExercises] = useState<PracticeExercise[]>([]);
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -64,24 +77,30 @@ export function PracticeSession() {
     (next: Partial<Prefs>) => {
       const merged: Prefs = {
         language: next.language ?? language,
-        level: next.level ?? level,
         bestStreak: next.bestStreak ?? bestStreak
       };
       savePrefs(merged);
     },
-    [language, level, bestStreak]
+    [language, bestStreak]
   );
 
   const current = exercises[index];
 
-  async function startSession() {
+  async function startLesson(node: RoadmapNode, nodeIndex: number) {
     setError("");
     setPhase("loading");
+    setActiveLesson({ node, index: nodeIndex });
     try {
       const res = await fetch("/api/practice/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ languageCode: language, level, count: 5 })
+        body: JSON.stringify({
+          languageCode: language,
+          level: node.level,
+          count: 6,
+          lessonKey: node.id,
+          nodeIndex
+        })
       });
       const data = (await res.json()) as { exercises?: PracticeExercise[]; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Failed to generate lesson.");
@@ -92,10 +111,11 @@ export function PracticeSession() {
       setStreak(0);
       setMaxStreakRun(0);
       setPhase("run");
-      persist({ language, level });
+      persist({ language });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
-      setPhase("pick");
+      setPhase("roadmap");
+      setActiveLesson(null);
     }
   }
 
@@ -118,6 +138,9 @@ export function PracticeSession() {
 
   function nextExercise() {
     if (index + 1 >= exercises.length) {
+      if (activeLesson) {
+        markLessonComplete(language, activeLesson.node.id, activeLesson.index);
+      }
       setPhase("summary");
       return;
     }
@@ -134,11 +157,11 @@ export function PracticeSession() {
           <p className="eyebrow">Interactive lessons</p>
           <h1>Practice</h1>
           <p className="contextLine">
-            Duolingo-style drills for the language you choose. Streak: {streak} · Best: {bestStreak}
+            Follow the path lesson by lesson. Streak: {streak} · Best: {bestStreak}
           </p>
         </header>
 
-        {phase === "pick" && (
+        {phase === "roadmap" && (
           <>
             <div className="languageGrid">
               <label className="fieldLabel">
@@ -155,31 +178,18 @@ export function PracticeSession() {
                   ))}
                 </select>
               </label>
-              <label className="fieldLabel">
-                Level
-                <select
-                  className="selectInput"
-                  value={level}
-                  onChange={(e) => setLevel(e.target.value as PracticeLevel)}
-                >
-                  {practiceLevels.map((lv) => (
-                    <option key={lv} value={lv}>
-                      {levelLabels[lv]}
-                    </option>
-                  ))}
-                </select>
-              </label>
             </div>
             {error ? (
               <p className="errorText" role="alert">
                 {error}
               </p>
             ) : null}
-            <div className="actionRow">
-              <button type="button" className="actionButton actionPrimary" onClick={startSession}>
-                Start lesson
-              </button>
-            </div>
+            <PracticeRoadmap
+              progress={roadmapProgress}
+              onSelectNode={(node, nodeIndex) => {
+                void startLesson(node, nodeIndex);
+              }}
+            />
           </>
         )}
 
@@ -191,12 +201,21 @@ export function PracticeSession() {
               <div className="practiceProgressFill" style={{ width: `${progress}%` }} />
             </div>
             <p className="practiceMeta">
-              {index + 1} / {exercises.length} · Score {score}
+              {activeLesson ? (
+                <>
+                  {activeLesson.node.title} · {index + 1} / {exercises.length} · Score {score}
+                </>
+              ) : (
+                <>
+                  {index + 1} / {exercises.length} · Score {score}
+                </>
+              )}
             </p>
 
             <PracticeExerciseStep
               key={index}
               exercise={current}
+              languageCode={language}
               onResult={(ok) => (ok ? recordCorrect() : recordWrong())}
               onContinue={nextExercise}
             />
@@ -215,11 +234,12 @@ export function PracticeSession() {
                 type="button"
                 className="actionButton actionPrimary"
                 onClick={() => {
-                  setPhase("pick");
+                  setPhase("roadmap");
                   setExercises([]);
+                  setActiveLesson(null);
                 }}
               >
-                New lesson
+                Back to roadmap
               </button>
             </div>
           </div>

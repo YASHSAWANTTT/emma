@@ -11,7 +11,7 @@ const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX_REQUESTS = 12;
 const MIN_COUNT = 3;
 const MAX_COUNT = 10;
-const DEFAULT_COUNT = 5;
+const DEFAULT_COUNT = 6;
 
 const requestLog = new Map<string, number[]>();
 
@@ -34,6 +34,8 @@ type GenerateBody = {
   languageCode: string;
   level: string;
   count?: number;
+  lessonKey?: string;
+  nodeIndex?: number;
 };
 
 const levelGuidance: Record<string, string> = {
@@ -65,6 +67,11 @@ export async function POST(request: NextRequest) {
     MAX_COUNT,
     Math.max(MIN_COUNT, Number(body.count) || DEFAULT_COUNT)
   );
+  const lessonKey = body.lessonKey?.trim() ?? "";
+  const nodeIndex =
+    typeof body.nodeIndex === "number" && Number.isFinite(body.nodeIndex)
+      ? body.nodeIndex
+      : null;
 
   if (!languageCode || !allowed.has(languageCode)) {
     return NextResponse.json({ error: "Invalid practice language." }, { status: 400 });
@@ -76,18 +83,34 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const lessonHint =
+    lessonKey || nodeIndex !== null
+      ? `This is roadmap step ${lessonKey || `node-${nodeIndex}`} (node index ${nodeIndex ?? "n/a"}). Vary topics slightly from generic drills.`
+    : "";
+
   const systemPrompt = `You output ONLY valid JSON: an array of exactly ${count} objects. No markdown, no prose outside JSON.
-Each object is one of three shapes (vary types across the batch):
-1) {"type":"mcq","prompt":"...","choices":["a","b","c","d"],"answerIndex":0,"explanation":"..."}
-   - prompt asks about the TARGET language (${languageCode}). Use English for instructions unless the exercise is "translate this word".
-   - exactly 4 choices, answerIndex 0-3.
-2) {"type":"gap","sentence":"... ___ ...","answer":"one word or short phrase","explanation":"..."}
-   - sentence must contain ___ exactly once as the blank. Target language content around the blank.
-3) {"type":"build","instruction":"Build this sentence in the target language.","tokens":["word1","word2",...],"solution":"correct full sentence","explanation":"optional short hint"}
-   - tokens: 4-8 words in RANDOM order (shuffle), all needed for solution; solution is the correct sentence in target language.
+
+Every object MUST include:
+- "context": string (1-3 sentences in English: scenario — what situation, what goal, what sentence they are forming or fixing)
+- "listenText": string (a natural phrase or sentence entirely in the TARGET language ${languageCode} for text-to-speech; should match what the learner should hear for this item)
+
+Use exactly FOUR exercise shapes, varied across the batch:
+
+1) MCQ: {"type":"mcq","context":"...","listenText":"...","prompt":"...","choices":["a","b","c","d"],"answerIndex":0,"explanation":"..."}
+   - exactly 4 choices; answerIndex 0-3; prompt can mix English instructions with target language where appropriate.
+
+2) GAP (fill blank): {"type":"gap","context":"...","listenText":"...","sentence":"... ___ ...","answer":"word or short phrase","explanation":"...","wordBank": optional array of 4-8 distractor+correct words in random order for tap-to-fill}
+   - sentence MUST contain ___ exactly once.
+
+3) BUILD: {"type":"build","context":"...","listenText":"...","instruction":"...","tokens":["..."],"solution":"full sentence in target language","explanation":"optional"}
+   - tokens: 4-8 words shuffled, all needed for solution.
+
+4) MATCH: {"type":"match","context":"...","listenText":"...","left":["w1","w2",...],"right":["m1","m2",...],"match":[...]}
+   - left and right SAME length n (n 3-5). match is length n: match[i] is the index in right that pairs with left[i]. It MUST be a permutation of 0..n-1 (each right index used once).
 
 Difficulty: ${levelGuidance[level] ?? levelGuidance.beginner}
-Target language code: ${languageCode}.`;
+Target language code: ${languageCode}.
+${lessonHint}`;
 
   try {
     const client = getOpenAIClient();

@@ -439,6 +439,191 @@ textarea {
   color: var(--ink-muted);
 }
 
+/* Practice roadmap (linear path) */
+.roadmapWrap {
+  margin-top: 0.75rem;
+}
+
+.roadmapHint {
+  margin: 0 0 0.65rem;
+  font-size: 0.84rem;
+  color: var(--ink-muted);
+}
+
+.roadmapList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.roadmapItem {
+  margin: 0 0 1.125rem;
+}
+
+.roadmapItem:last-child {
+  margin-bottom: 0;
+}
+
+.roadmapNode {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  text-align: left;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink-main);
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+
+.roadmapNode:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.roadmapNodeLocked {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.roadmapNodeDone {
+  border-color: rgba(180, 255, 180, 0.35);
+  background: rgba(60, 100, 60, 0.15);
+}
+
+.roadmapNodeActive {
+  border-color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.roadmapNodeTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.65rem;
+  width: 100%;
+}
+
+.roadmapNodeTitle {
+  font-weight: 600;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.roadmapNodeMeta {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  line-height: 1.3;
+}
+
+.roadmapNodeBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.roadmapBadge {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--ink-muted);
+}
+
+/* Exercise header: scenario + listen */
+.practiceExerciseHeader {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.practiceContext {
+  margin: 0 0 0.65rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--ink-main);
+}
+
+.practiceListenRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.practicePlayBtn {
+  font-size: 0.88rem;
+}
+
+.practiceAudioError {
+  margin: 0.5rem 0 0;
+  font-size: 0.82rem;
+  color: var(--danger);
+}
+
+/* Match pairs */
+.practiceMatchGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.practiceMatchCol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.practiceMatchCell {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink-main);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.practiceMatchCell:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.practiceMatchPending {
+  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.practiceMatchPaired {
+  border-color: rgba(200, 200, 255, 0.4);
+  background: rgba(100, 100, 180, 0.15);
+}
+
+.practiceMatchOk {
+  border-color: rgba(180, 255, 180, 0.5);
+  background: rgba(80, 160, 80, 0.2);
+}
+
+.practiceMatchBad {
+  border-color: rgba(255, 150, 150, 0.5);
+  background: rgba(160, 60, 60, 0.2);
+}
+
 @media (max-width: 700px) {
   .pageShell {
     padding: 1.1rem 0.82rem;

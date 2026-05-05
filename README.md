@@ -1,6 +1,6 @@
 # Emma (Zoom translator + practice)
 
-This project is a Zoom-friendly Next.js app: **Translate** text with OpenAI, and **Practice** with short interactive drills (multiple choice, fill-in-the-blank, build-a-sentence) by language and level.
+This project is a Zoom-friendly Next.js app: **Translate** text with OpenAI, and **Practice** with a linear lesson path and interactive drills (multiple choice, gap fill with optional word bank, build-a-sentence, and matching pairs).
 
 ## Prerequisites
 
@@ -29,11 +29,10 @@ The app runs at `http://localhost:3000`.
 ## Practice mode (`/practice`)
 
 - Open **Practice** from the top nav or go to `/practice`.
-- Pick a **language** (no “auto” — you choose what you’re learning) and a **level**:
-  - **Beginner** — roughly A1–A2: short phrases, basic vocabulary.
-  - **Intermediate** — roughly B1–B2: everyday topics, richer sentences.
-  - **Advanced** — roughly C1-ish: more nuance and longer prompts.
-- Each lesson is generated on demand via `POST /api/practice/generate` (OpenAI). Exercises include MCQ, gap fill (`___`), and word-order “build” challenges.
+- Pick a **language** (no “auto”). You’ll see a **roadmap**: a linear path of lessons (like Duolingo). Finish a lesson to unlock the next. Progress is stored in **`localStorage`** per language (`emma-roadmap-<code>`), with no backend for v1.
+- Each node has an implicit **difficulty band** (beginner → intermediate → advanced) that is sent to the generator so prompts stay on-level.
+- Lessons are generated on demand via `POST /api/practice/generate` (OpenAI). Exercise types include **MCQ**, **gap** (`___`, optional **word bank**), **build** (word order), and **match** (pair left/right columns). Every item has a short **context** (scenario) and **`listenText`** in the target language.
+- **Play** uses normal browser audio: `POST /api/practice/tts` returns synthesized speech (OpenAI), and the client plays it on the **device’s default output** (speakers, headphones, Bluetooth)—the same as any webpage. Audio is **not** injected into Zoom or meeting RTMS. If autoplay is blocked, tap **Play** (user gesture). If TTS fails, the client may fall back to **`speechSynthesis`** where supported.
 
 **Teacher disclaimer:** AI-generated content can be wrong or culturally off. Review material before using it for formal assessment or graded homework.
 
@@ -63,7 +62,8 @@ Install the app to your Zoom test account, then open a meeting and launch the ap
 - Translate UI: `src/components/TranslatorPanel.tsx` (home `/`).
 - Practice UI: `src/components/practice/PracticeSession.tsx` (`/practice`).
 - `POST /api/translate` — translation.
-- `POST /api/practice/generate` — lesson JSON (exercises array).
+- `POST /api/practice/generate` — lesson JSON (exercises array); optional `lessonKey` / `nodeIndex` tailor the prompt per roadmap step.
+- `POST /api/practice/tts` — speech audio (`audio/mpeg`) for `listenText` playback (uses OpenAI quota).
 - OpenAI key is only used server-side.
 
 ## Test Plan

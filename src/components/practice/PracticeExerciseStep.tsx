@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { PracticeExercise } from "@/lib/practiceTypes";
+import { usePracticeAudio } from "@/hooks/usePracticeAudio";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -12,19 +13,58 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+function ExerciseHeader({
+  context,
+  listenText,
+  languageCode
+}: {
+  context: string;
+  listenText: string;
+  languageCode: string;
+}) {
+  const { play, loading, error, stop } = usePracticeAudio(languageCode);
+
+  return (
+    <div className="practiceExerciseHeader">
+      <p className="practiceContext">{context}</p>
+      <div className="practiceListenRow">
+        <button
+          type="button"
+          className="actionButton actionGhost practicePlayBtn"
+          onClick={() => play(listenText)}
+          disabled={loading}
+        >
+          {loading ? "Loading…" : "Play sentence"}
+        </button>
+        <button type="button" className="actionButton actionGhost" onClick={stop}>
+          Stop
+        </button>
+      </div>
+      {error ? (
+        <p className="practiceAudioError" role="status">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 type Props = {
   exercise: PracticeExercise;
+  languageCode: string;
   onResult: (correct: boolean) => void;
   onContinue: () => void;
 };
 
-export function PracticeExerciseStep({ exercise, onResult, onContinue }: Props) {
+export function PracticeExerciseStep({ exercise, languageCode, onResult, onContinue }: Props) {
   const [mcqPick, setMcqPick] = useState<number | null>(null);
   const [gapInput, setGapInput] = useState("");
   const [buildOrder, setBuildOrder] = useState<string[]>([]);
   const [buildPool, setBuildPool] = useState<string[]>(() =>
     exercise.type === "build" ? shuffle(exercise.tokens) : []
   );
+  const [pendingLeft, setPendingLeft] = useState<number | null>(null);
+  const [assignment, setAssignment] = useState<Record<number, number>>({});
   const [revealed, setRevealed] = useState(false);
   const [reported, setReported] = useState(false);
 
@@ -58,9 +98,34 @@ export function PracticeExerciseStep({ exercise, onResult, onContinue }: Props) 
     }
   };
 
+  const checkMatch = (ex: Extract<PracticeExercise, { type: "match" }>) => {
+    setRevealed(true);
+    let ok = true;
+    for (let i = 0; i < ex.left.length; i++) {
+      if (assignment[i] !== ex.match[i]) {
+        ok = false;
+        break;
+      }
+    }
+    if (Object.keys(assignment).length !== ex.left.length) ok = false;
+    if (!reported) {
+      onResult(ok);
+      setReported(true);
+    }
+  };
+
+  const appendWordBank = (word: string) => {
+    setGapInput((prev) => (prev ? `${prev.trim()} ${word}` : word));
+  };
+
   if (exercise.type === "mcq") {
     return (
       <div className="practiceExercise">
+        <ExerciseHeader
+          context={exercise.context}
+          listenText={exercise.listenText}
+          languageCode={languageCode}
+        />
         <p className="practicePrompt">{exercise.prompt}</p>
         <div className="practiceChoices">
           {exercise.choices.map((c, i) => (
@@ -106,8 +171,14 @@ export function PracticeExerciseStep({ exercise, onResult, onContinue }: Props) 
   }
 
   if (exercise.type === "gap") {
+    const bank = exercise.wordBank;
     return (
       <div className="practiceExercise">
+        <ExerciseHeader
+          context={exercise.context}
+          listenText={exercise.listenText}
+          languageCode={languageCode}
+        />
         <p className="practicePrompt practiceGapSentence">
           {exercise.sentence.split("___").map((part, i, arr) => (
             <span key={i}>
@@ -116,6 +187,24 @@ export function PracticeExerciseStep({ exercise, onResult, onContinue }: Props) 
             </span>
           ))}
         </p>
+        {bank && bank.length ? (
+          <>
+            <p className="practiceSub">Tap a block to add it to your answer</p>
+            <div className="practiceChipRow">
+              {bank.map((w, i) => (
+                <button
+                  key={`${w}-${i}`}
+                  type="button"
+                  className="practiceChip"
+                  disabled={revealed}
+                  onClick={() => appendWordBank(w)}
+                >
+                  {w}
+                </button>
+              ))}
+            </div>
+          </>
+        ) : null}
         <label className="fieldLabel sectionLabel" htmlFor="gap-ans">
           Your answer
         </label>
@@ -151,10 +240,126 @@ export function PracticeExerciseStep({ exercise, onResult, onContinue }: Props) 
     );
   }
 
+  if (exercise.type === "match") {
+    const ex = exercise;
+    const n = ex.left.length;
+    const assignedRights = new Set(Object.values(assignment));
+
+    return (
+      <div className="practiceExercise">
+        <ExerciseHeader context={ex.context} listenText={ex.listenText} languageCode={languageCode} />
+        <p className="practiceSub">Tap one item on the left, then its match on the right.</p>
+        <div className="practiceMatchGrid">
+          <div className="practiceMatchCol">
+            {ex.left.map((label, i) => {
+              const isPaired = assignment[i] !== undefined;
+              const isPending = pendingLeft === i;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  className={
+                    revealed
+                      ? assignment[i] === ex.match[i]
+                        ? "practiceMatchCell practiceMatchOk"
+                        : "practiceMatchCell practiceMatchBad"
+                      : isPaired
+                        ? "practiceMatchCell practiceMatchPaired"
+                        : isPending
+                          ? "practiceMatchCell practiceMatchPending"
+                          : "practiceMatchCell"
+                  }
+                  disabled={revealed}
+                  onClick={() => setPendingLeft((p) => (p === i ? null : i))}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="practiceMatchCol">
+            {ex.right.map((label, j) => {
+              const takenBy = Object.entries(assignment).find(([, r]) => r === j)?.[0];
+              const isPaired = takenBy !== undefined;
+              return (
+                <button
+                  key={j}
+                  type="button"
+                  className={
+                    revealed && takenBy !== undefined
+                      ? assignment[Number(takenBy)] === ex.match[Number(takenBy)]
+                        ? "practiceMatchCell practiceMatchOk"
+                        : "practiceMatchCell practiceMatchBad"
+                      : isPaired
+                        ? "practiceMatchCell practiceMatchPaired"
+                        : "practiceMatchCell"
+                  }
+                  disabled={revealed}
+                  onClick={() => {
+                    if (pendingLeft === null) return;
+                    setAssignment((prev) => {
+                      const next = { ...prev };
+                      const usedLeft = Object.entries(next).find(([, r]) => r === j)?.[0];
+                      if (usedLeft !== undefined) delete next[Number(usedLeft)];
+                      next[pendingLeft] = j;
+                      return next;
+                    });
+                    setPendingLeft(null);
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        {!revealed ? (
+          <button
+            type="button"
+            className="actionButton actionGhost"
+            onClick={() => {
+              setAssignment({});
+              setPendingLeft(null);
+            }}
+          >
+            Clear pairs
+          </button>
+        ) : null}
+        {revealed ? (
+          <p className="practiceExplain">
+            {Object.keys(assignment).length === n
+              ? "Review your pairs above."
+              : "Incomplete matching."}
+          </p>
+        ) : null}
+        <div className="actionRow">
+          <button
+            type="button"
+            className="actionButton actionPrimary"
+            disabled={Object.keys(assignment).length !== n || revealed}
+            onClick={() => checkMatch(ex)}
+          >
+            Check
+          </button>
+          {revealed ? (
+            <button type="button" className="actionButton actionGhost" onClick={onContinue}>
+              Next
+            </button>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
   const buildEx = exercise;
 
   return (
     <div className="practiceExercise">
+      <ExerciseHeader
+        context={buildEx.context}
+        listenText={buildEx.listenText}
+        languageCode={languageCode}
+      />
       <p className="practicePrompt">{buildEx.instruction}</p>
       <p className="practiceSub">Tap words in order. Your sentence:</p>
       <div className="practiceBuildSentence">
