@@ -6,7 +6,8 @@ import { usePathname } from "next/navigation";
 
 export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
   const pathname = usePathname();
-  const isTranslate = pathname === "/";
+  const isHome = pathname === "/";
+  const isTranslate = pathname === "/translate";
   const isPractice = pathname === "/practice";
 
   return (
@@ -16,7 +17,13 @@ export function AppShell({ children }: Readonly<{ children: ReactNode }>) {
           Emma
         </Link>
         <nav className="appNavLinks" aria-label="Main">
-          <Link href="/" className={isTranslate ? "appNavLink appNavLinkActive" : "appNavLink"}>
+          <Link href="/" className={isHome ? "appNavLink appNavLinkActive" : "appNavLink"}>
+            Home
+          </Link>
+          <Link
+            href="/translate"
+            className={isTranslate ? "appNavLink appNavLinkActive" : "appNavLink"}
+          >
             Translate
           </Link>
           <Link

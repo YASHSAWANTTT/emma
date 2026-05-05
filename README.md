@@ -26,6 +26,9 @@ This project is a Zoom-friendly Next.js app: **Translate** text with OpenAI, and
 
 The app runs at `http://localhost:3000`.
 
+- **Home** (`/`) — marketing landing with the same animated wave background as the app; optional demo embed via `NEXT_PUBLIC_DEMO_VIDEO_URL` (YouTube, Vimeo, or a direct video URL).
+- **Translate** (`/translate`) — OpenAI translation UI.
+
 ## Practice mode (`/practice`)
 
 - Open **Practice** from the top nav or go to `/practice`.
@@ -59,7 +62,8 @@ Install the app to your Zoom test account, then open a meeting and launch the ap
 
 ## How It Works
 
-- Translate UI: `src/components/TranslatorPanel.tsx` (home `/`).
+- Landing: `src/components/landing/LandingPage.tsx` (`/`).
+- Translate UI: `src/components/TranslatorPanel.tsx` (`/translate`).
 - Practice UI: `src/components/practice/PracticeSession.tsx` (`/practice`).
 - `POST /api/translate` — translation.
 - `POST /api/practice/generate` — lesson JSON (exercises array); optional `lessonKey` / `nodeIndex` tailor the prompt per roadmap step.
