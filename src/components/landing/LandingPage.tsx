@@ -75,8 +75,10 @@ function DemoVideoBlock({ url }: { url: string | undefined }) {
   );
 }
 
+const DEFAULT_DEMO_VIDEO_URL = "https://youtu.be/Mdw_XmNaZ4I";
+
 export function LandingPage() {
-  const demoUrl = process.env.NEXT_PUBLIC_DEMO_VIDEO_URL?.trim() || undefined;
+  const demoUrl = process.env.NEXT_PUBLIC_DEMO_VIDEO_URL?.trim() || DEFAULT_DEMO_VIDEO_URL;
 
   return (
     <main className="pageShell landingShell">
